@@ -1,7 +1,10 @@
 # coding: utf-8
 
 import numpy as np
-from .sbox import *
+from .sbox import Sbox, InvSbox, Rcon
+from .sbox import M1, M2, M3, M9, M11, M13, M14
+from base64 import urlsafe_b64encode as b64encode
+from base64 import urlsafe_b64decode as b64decode
 
 StateSlice = [-1, 4, 4]
 
@@ -128,13 +131,19 @@ def aes_encrypt(data, key):
         s2 = lShiftRows(s1)
         s3 = mixColumn(s2) if i != 10 else s2
         s0 = addRoundKey(s3, roundKey[i])
+    s4 = s0.ravel().astype(np.int8)
+    b0 = s4.tobytes()
+    b1 = b64encode(b0)
 
-    return s0
+    return b1
 
 
-def aes_decrypt(s0, key):
+def aes_decrypt(b1, key):
     roundKey = keySchedule(key)
 
+    b0 = b64decode(b1)
+    s4 = np.frombuffer(b0, dtype=np.int8)
+    s0 = s4.reshape([-1, 4, 4])
     for i in reversed(range(1, 11)):
         s3 = addRoundKey(s0, roundKey[i])
         s2 = invMixColumn(s3) if i != 10 else s3

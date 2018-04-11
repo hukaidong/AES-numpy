@@ -11,8 +11,16 @@ Default_Text = (
     "of Standards and Technology (NIST) in 2001.")
 key = "AES_ENCRIPT_TEST"
 
-text = input("Data you want to encrypt: \n")
+text = input("\tData you want to encrypt: \n")
 if not text:
     text = Default_Text
-states = aes_encrypt(text, key)
-print(aes_decrypt(states, key))
+print("\n\tThis string will be encrypted:\n")
+print(text)
+
+encrypted = aes_encrypt(text, key)
+print("\n\tEncrypted message is:\n")
+print(encrypted.decode())
+
+decrypted = aes_decrypt(encrypted, key)
+print("\n\tDecrypted message is:\n")
+print(decrypted.decode())
