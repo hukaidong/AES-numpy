@@ -1,0 +1,10 @@
+#!/usr/bin/env python
+# encoding: utf-8
+
+from aes import testAll, aes_encrypt, aes_decrypt
+
+key = "AES_ENCRIPT_TEST"
+
+encrypted = input()
+decrypted = aes_decrypt(encrypted, key)
+print(decrypted.decode())
