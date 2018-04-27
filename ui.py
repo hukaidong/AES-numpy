@@ -29,6 +29,9 @@ def lim(*args):
 def show_entry_fields():
     text = e1.get()
     key = e2.get()
+    error = "Please insert 16 character Key"
+    if len(key) < 16:
+        tkinter.messagebox.showerror("Error", error)
     encrypted = aes_encrypt(text, key)
     print("\n\tEncrypted message is:\n")
     print(encrypted.decode())
@@ -38,6 +41,9 @@ def show_entry_fields():
 def show_decryption_fields():
     text = e1.get()
     key = e2.get()
+    error = "Please insert 16 character Key"
+    if len(key) < 16:
+        tkinter.messagebox.showerror("Error", error)
     decrypted = aes_decrypt(encrypted, key)
     print("\n\tDecrypted message is:\n")
     print(decrypted.decode())
