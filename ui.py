@@ -32,7 +32,7 @@ def show_entry_fields():
     encrypted = aes_encrypt(text, key)
     print("\n\tEncrypted message is:\n")
     print(encrypted.decode())
-    tkinter.messagebox.showinfo("Encrypted Text", text)
+    tkinter.messagebox.showinfo("Encrypted Text",encrypted.decode())
   
 
 def show_decryption_fields():
@@ -41,7 +41,7 @@ def show_decryption_fields():
     decrypted = aes_decrypt(encrypted, key)
     print("\n\tDecrypted message is:\n")
     print(decrypted.decode())
-    tkinter.messagebox.showinfo("Decrypted Text", text)
+    tkinter.messagebox.showinfo("Decrypted Text",decrypted.decode())
 
     
 master = Tk()
