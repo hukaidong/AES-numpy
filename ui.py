@@ -1,6 +1,6 @@
 from tkinter import *
-import Tkinter, Tkconstants, tkFileDialog
 import tkinter.messagebox
+from aes import aes_encrypt, aes_decrypt
 
 
 def browsepage():
@@ -15,17 +15,17 @@ def browsepage():
     Label(root, text="Key").grid(row=10,column=1)
     e3 = Entry(root,width=16)
     e3.grid(row=1, column=1)
-   
+
     #print (root.filename)
-   
-        
+
+
 def lim(*args):
     value = dayValue.get()
     if len(value) > 16 :
         dayValue.set(value[:16])
 
 
-                   
+
 def show_entry_fields():
     text = e1.get()
     key = e2.get()
@@ -36,7 +36,7 @@ def show_entry_fields():
     print("\n\tEncrypted message is:\n")
     print(encrypted.decode())
     tkinter.messagebox.showinfo("Encrypted Text",encrypted.decode())
-  
+
 
 def show_decryption_fields():
     text = e1.get()
@@ -49,7 +49,7 @@ def show_decryption_fields():
     print(decrypted.decode())
     tkinter.messagebox.showinfo("Decrypted Text",decrypted.decode())
 
-    
+
 master = Tk()
 master.geometry('400x400')
 master.title("AES Encryption")
