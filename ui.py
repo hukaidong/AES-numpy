@@ -44,7 +44,7 @@ def show_decryption_fields():
     error = "Please insert 16 character Key"
     if len(key) < 16:
         tkinter.messagebox.showerror("Error", error)
-    decrypted = aes_decrypt(encrypted, key)
+    decrypted = aes_decrypt(text, key)
     print("\n\tDecrypted message is:\n")
     print(decrypted.decode())
     tkinter.messagebox.showinfo("Decrypted Text",decrypted.decode())
