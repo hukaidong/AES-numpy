@@ -6,7 +6,7 @@ from .sbox import M1, M2, M3, M9, M11, M13, M14
 from base64 import urlsafe_b64encode as b64encode
 from base64 import urlsafe_b64decode as b64decode
 
-StateSlice = [-1, 4, 4]
+StateSlice = -1, 4, 4
 
 
 def text2states(text):
@@ -50,15 +50,22 @@ def lShiftRows(state):
     return state
 
 
+def _xtime(a):
+    return (((a << 1) ^ 0x1B) & 0xFF) if (a & 0x80) else (a << 1)
+
+
 def _mixColumn(a):
     # https://en.wikipedia.org/wiki/Rijndael_MixColumns#Implementation_example
-    xtime = lambda a: (((a << 1) ^ 0x1B) & 0xFF) if (a & 0x80) else (a << 1)
-    b = list(map(xtime, a))
+    a0, a1, a2, a3 = a
+    b0 = _xtime(a0)
+    b1 = _xtime(a1)
+    b2 = _xtime(a2)
+    b3 = _xtime(a3)
     r = np.zeros(4, dtype=np.int8)
-    r[0] = b[0] ^ a[3] ^ a[2] ^ b[1] ^ a[1]
-    r[1] = b[1] ^ a[0] ^ a[3] ^ b[2] ^ a[2]
-    r[2] = b[2] ^ a[1] ^ a[0] ^ b[3] ^ a[3]
-    r[3] = b[3] ^ a[2] ^ a[1] ^ b[0] ^ a[0]
+    r[0] = b0 ^ a3 ^ a2 ^ b1 ^ a1
+    r[1] = b1 ^ a0 ^ a3 ^ b2 ^ a2
+    r[2] = b2 ^ a1 ^ a0 ^ b3 ^ a3
+    r[3] = b3 ^ a2 ^ a1 ^ b0 ^ a0
     return r
 
 
@@ -83,16 +90,16 @@ def _invMixColumnByTable(a):
 
 
 def mixColumn(state):
-    s0 = state.transpose([0, 2, 1]).reshape((-1, 4))
+    s0 = state.transpose((0, 2, 1)).reshape((-1, 4))
     s1 = np.apply_along_axis(_mixColumnByTable, 1, s0)
-    s2 = s1.reshape([-1, 4, 4]).transpose([0, 2, 1])
+    s2 = s1.reshape((-1, 4, 4)).transpose((0, 2, 1))
     return s2
 
 
 def invMixColumn(state):
-    s0 = state.transpose([0, 2, 1]).reshape((-1, 4))
+    s0 = state.transpose((0, 2, 1)).reshape((-1, 4))
     s1 = np.apply_along_axis(_invMixColumnByTable, 1, s0)
-    s2 = s1.reshape([-1, 4, 4]).transpose([0, 2, 1])
+    s2 = s1.reshape((-1, 4, 4)).transpose((0, 2, 1))
     return s2
 
 
@@ -102,19 +109,22 @@ def keySchedule(key):
 
     r0 = text2states(key).reshape((4, 4)).tolist()
     for i in range(4, 4 * 11):
-        r0.append([])
+        r0i = []
+        r0.append(r0i)
+        r0i4 = r0[i - 4]
+        r0i1 = r0[i - 1]
 
         if i % 4 == 0:
-            byte = r0[i - 4][0] ^ Sbox[r0[i - 1][1]] ^ Rcon[i // 4]
-            r0[i].append(byte)
+            byte = r0i4[0] ^ Sbox[r0i1[1]] ^ Rcon[i // 4]
+            r0i.append(byte)
 
             for j in range(1, 4):
-                byte = r0[i - 4][j] ^ Sbox[r0[i - 1][(j + 1) % 4]]
-                r0[i].append(byte)
+                byte = r0i4[j] ^ Sbox[r0i1[(j + 1) % 4]]
+                r0i.append(byte)
         else:
             for j in range(4):
-                byte = r0[i - 4][j] ^ r0[i - 1][j]
-                r0[i].append(byte)
+                byte = r0i4[j] ^ r0i1[j]
+                r0i.append(byte)
     return np.array(r0).reshape((-1, 4, 4))
 
 
@@ -144,7 +154,7 @@ def aes_decrypt(b1, key):
     b0 = b64decode(b1)
     s4 = np.frombuffer(b0, dtype=np.int8)
     s0 = s4.reshape([-1, 4, 4])
-    for i in reversed(range(1, 11)):
+    for i in range(10, 0, -1):
         s3 = addRoundKey(s0, roundKey[i])
         s2 = invMixColumn(s3) if i != 10 else s3
         s1 = rShiftRows(s2)
